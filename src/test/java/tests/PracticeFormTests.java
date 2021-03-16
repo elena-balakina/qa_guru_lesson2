@@ -1,16 +1,17 @@
 package tests;
 
-import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Configuration;
-import org.junit.jupiter.api.AfterAll;
+import com.codeborne.selenide.SelenideElement;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 
-import static com.codeborne.selenide.Condition.*;
-import static com.codeborne.selenide.Selectors.*;
-import static com.codeborne.selenide.Selenide.*;
+import static com.codeborne.selenide.Condition.text;
+import static com.codeborne.selenide.Selectors.byText;
+import static com.codeborne.selenide.Selenide.$;
+import static com.codeborne.selenide.Selenide.open;
+
 
 public class PracticeFormTests {
 
@@ -45,23 +46,19 @@ public class PracticeFormTests {
         $(String.format("input[value='%s'", gender)).parent().$("label").click();
         $("#userNumber").setValue(mobilePhone);
 
-        //  Select date of Birth
         $("#dateOfBirthInput").click();
         $(".react-datepicker__month-select").selectOptionContainingText(monthOfBirth);
         $(".react-datepicker__year-select").selectOptionContainingText(yearOfBirth);
         $(String.format("[aria-label='Choose Monday, %s %sst, %s']", monthOfBirth, dayOfBirth, yearOfBirth)).click();
 
-        //  Select subjects
         for (String subject : subjects) {
             $("#subjectsInput").setValue(subject).pressEnter();
         }
 
-        //  Select hobbies
         for (String hobby : hobbies) {
             $("#hobbiesWrapper").$(byText(hobby)).click();
         }
 
-        // Upload picture
         File picture = new File(picturePath);
         $("#uploadPicture").uploadFile(picture);
 
@@ -69,31 +66,55 @@ public class PracticeFormTests {
         $("#react-select-3-input").setValue(state).pressEnter();
         $("#react-select-4-input").setValue(city).pressEnter();
 
-        // Click submit button
         $("#submit").click();
 
-        // Assertions
-        $(byText("Student Name")).parent().shouldHave(text(firstName), text(lastName));
-        $(byText("Student Email")).parent().shouldHave(text(email));
-        $(byText("Gender")).parent().shouldHave(text(gender));
-        $(byText("State and City")).parent().shouldHave(text(state), text(city));
+        // Assertions for every row in results table
+        SelenideElement resultsTable = $(".table-responsive");
+        resultsTable.$(byText("Student Name")).parent().shouldHave(text(firstName), text(lastName));
+        resultsTable.$(byText("Student Email")).parent().shouldHave(text(email));
+        resultsTable.$(byText("Gender")).parent().shouldHave(text(gender));
+        resultsTable.$(byText("Mobile")).parent().$("td", 1).shouldHave(text(mobilePhone));
+        resultsTable.$(byText("Date of Birth")).parent().$("td", 1).shouldHave(text(dayOfBirth), text(monthOfBirth), text(yearOfBirth));
 
-        $x("//td[text()='Mobile']//..").shouldHave(text(mobilePhone));
-//        $(byText("Mobile")).parent().shouldHave(text(mobilePhone));
+        for (String subject : subjects) {
+            resultsTable.$(byText("Subjects")).parent().$("td", 1).shouldHave(text(subject));
+        }
 
+        for (String hobby : hobbies) {
+            resultsTable.$(byText("Hobbies")).parent().$("td", 1).shouldHave(text(hobby));
+        }
 
-        $x("//td[text()='Date of Birth']//..").shouldHave(text(dayOfBirth), text(monthOfBirth), text(yearOfBirth));
-        $(byText("Date of Birth")).parent().shouldHave(text(dayOfBirth), text(monthOfBirth), text(yearOfBirth));
-//        $(byText("Mobile")).parent().shouldHave(1234567890));
+        resultsTable.$(byText("Picture")).parent().$("td", 1).shouldHave(text(pictureName));
+        resultsTable.$(byText("Address")).parent().$("td", 1).shouldHave(text(currentAddress));
+        resultsTable.$(byText("State and City")).parent().$("td", 1).shouldHave(text(state), text(city));
 
+        // Assertions in .modal-content
+        $((".modal-content")).shouldHave(
+                text(firstName),
+                text(lastName),
+                text(email),
+                text(gender),
+                text(mobilePhone),
+                text(monthOfBirth),
+                text(yearOfBirth),
+                text(subjects[0]),
+                text(subjects[1]),
+                text(subjects[2]),
+                text(hobbies[0]),
+                text(hobbies[1]),
+                text(pictureName),
+                text(currentAddress),
+                text(state),
+                text(city)
+        );
 
-//        $(byText("Date of Birth")).parent().shouldHave(text(String.format("%s %s,%s", dayOfBirth, monthOfBirth, yearOfBirth)));
-//        $(byText("Date of Birth")).parent().shouldHave(text(monthOfBirth));
-//        $(byText("Subjects")).parent().shouldHave(text("Maths"));
+        // Another approach for subjects/hobbies assertions
+        for (String subject : subjects) {
+            $((".modal-content")).shouldHave(text(subject));
+        }
 
-//        $(byText("Picture")).parent().shouldHave(text(pictureName));
-
-//        sleep(10000);
-        System.out.println("debug");
+        for (String hobby : hobbies) {
+            $((".modal-content")).shouldHave(text(hobby));
+        }
     }
 }
