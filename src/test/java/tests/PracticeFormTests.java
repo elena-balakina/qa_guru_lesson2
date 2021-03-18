@@ -21,7 +21,7 @@ public class PracticeFormTests {
     }
 
     @Test
-    void successfulFillPracticeFormTest() throws InterruptedException {
+    void successfulFillPracticeFormTest() {
         String firstName = "Ivan";
         String lastName = "Ivanov";
         String email = "ivan.ivanov@company.com";
@@ -32,7 +32,6 @@ public class PracticeFormTests {
         String dayOfBirth = "1";
         String[] subjects = new String[]{"Maths", "English", "Computer Science"};
         String[] hobbies = new String[]{"Reading", "Music"};
-        String picturePath = "src/test/resources/img.jpg";
         String pictureName = "img.jpg";
         String currentAddress = "Rajasthan, Jaipur, Street, 1st";
         String state = "Rajasthan";
@@ -49,18 +48,12 @@ public class PracticeFormTests {
         $("#dateOfBirthInput").click();
         $(".react-datepicker__month-select").selectOptionContainingText(monthOfBirth);
         $(".react-datepicker__year-select").selectOptionContainingText(yearOfBirth);
-        $(String.format("[aria-label='Choose Monday, %s %sst, %s']", monthOfBirth, dayOfBirth, yearOfBirth)).click();
+        $(".react-datepicker__month").$(byText(dayOfBirth)).click();
 
-        for (String subject : subjects) {
-            $("#subjectsInput").setValue(subject).pressEnter();
-        }
+        setSubjects(subjects);
+        setHobbies(hobbies);
 
-        for (String hobby : hobbies) {
-            $("#hobbiesWrapper").$(byText(hobby)).click();
-        }
-
-        File picture = new File(picturePath);
-        $("#uploadPicture").uploadFile(picture);
+        $("#uploadPicture").uploadFromClasspath(pictureName);
 
         $("#currentAddress").setValue(currentAddress);
         $("#react-select-3-input").setValue(state).pressEnter();
@@ -76,9 +69,8 @@ public class PracticeFormTests {
         resultsTable.$(byText("Mobile")).parent().$("td", 1).shouldHave(text(mobilePhone));
         resultsTable.$(byText("Date of Birth")).parent().$("td", 1).shouldHave(text(dayOfBirth), text(monthOfBirth), text(yearOfBirth));
 
-        for (String subject : subjects) {
-            resultsTable.$(byText("Subjects")).parent().$("td", 1).shouldHave(text(subject));
-        }
+        checkSubjects(resultsTable, subjects);
+        checkHobbies(resultsTable, hobbies);
 
         for (String hobby : hobbies) {
             resultsTable.$(byText("Hobbies")).parent().$("td", 1).shouldHave(text(hobby));
@@ -89,7 +81,7 @@ public class PracticeFormTests {
         resultsTable.$(byText("State and City")).parent().$("td", 1).shouldHave(text(state), text(city));
 
         // Assertions in .modal-content
-        $((".modal-content")).shouldHave(
+        $(".modal-content").shouldHave(
                 text(firstName),
                 text(lastName),
                 text(email),
@@ -115,6 +107,30 @@ public class PracticeFormTests {
 
         for (String hobby : hobbies) {
             $((".modal-content")).shouldHave(text(hobby));
+        }
+    }
+
+    private void setSubjects(String[] subjects) {
+        for (String subject : subjects) {
+            $("#subjectsInput").setValue(subject).pressEnter();
+        }
+    }
+
+    private void setHobbies(String[] hobbies) {
+        for (String hobby : hobbies) {
+            $("#hobbiesWrapper").$(byText(hobby)).click();
+        }
+    }
+
+    private void checkSubjects(SelenideElement resultsTable, String[] subjects) {
+        for (String subject : subjects) {
+            resultsTable.$(byText("Subjects")).parent().$("td", 1).shouldHave(text(subject));
+        }
+    }
+
+    private void checkHobbies(SelenideElement resultsTable, String[] hobbies) {
+        for (String hobby : hobbies) {
+            resultsTable.$(byText("Hobbies")).parent().$("td", 1).shouldHave(text(hobby));
         }
     }
 }
