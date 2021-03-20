@@ -72,10 +72,6 @@ public class PracticeFormTests {
         checkSubjects(resultsTable, subjects);
         checkHobbies(resultsTable, hobbies);
 
-        for (String hobby : hobbies) {
-            resultsTable.$(byText("Hobbies")).parent().$("td", 1).shouldHave(text(hobby));
-        }
-
         resultsTable.$(byText("Picture")).parent().$("td", 1).shouldHave(text(pictureName));
         resultsTable.$(byText("Address")).parent().$("td", 1).shouldHave(text(currentAddress));
         resultsTable.$(byText("State and City")).parent().$("td", 1).shouldHave(text(state), text(city));
@@ -102,11 +98,11 @@ public class PracticeFormTests {
 
         // Another approach for subjects/hobbies assertions
         for (String subject : subjects) {
-            $((".modal-content")).shouldHave(text(subject));
+            $(".modal-content").shouldHave(text(subject));
         }
 
         for (String hobby : hobbies) {
-            $((".modal-content")).shouldHave(text(hobby));
+            $(".modal-content").shouldHave(text(hobby));
         }
     }
 
